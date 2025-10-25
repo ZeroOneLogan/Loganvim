@@ -51,6 +51,10 @@ require('lazy').setup({
     require 'logan.plugins.bufferline',
 
     require 'logan.plugins.lualine',
+
+    require 'logan.plugins.diagnostics',
+
+    require 'logan.plugins.neogit',
 }, {
     ui = {
         icons = vim.g.have_nerd_font and {} or {

@@ -17,7 +17,7 @@ return {
                 '███████╗╚██████╔╝╚██████╔╝██║  ██║██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║',
                 '╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝',
                 '',
-                '          🌀 Welcome to LOGANVIM — Code. Flow. Dominate. 🌀',
+                '        🌀 Welcome to LOGANVIM — Code. Flow. Dominate. 🌀',
                 '',
             }
 
