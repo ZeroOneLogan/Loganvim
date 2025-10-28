@@ -35,6 +35,6 @@ if use_minimal_default_colors then
 
     require(mod)
 else
-    vim.cmd.colorscheme 'rose-pine'
+    vim.cmd.colorscheme 'tokyonight-night'
 end
 -- vim: ts=2 sts=2 sw=2 et

@@ -227,7 +227,9 @@ return {
                 emmet_ls = {},
                 prismals = {},
                 pyright = {},
-                eslint = {},
+                bashls = {},
+                jsonls = {},
+                clangd = {},
                 --
 
                 lua_ls = {
@@ -267,6 +269,11 @@ return {
                 'black',
                 'pylint',
                 'eslint_d',
+                'eslint',
+                'markdownlint-cli2',
+                'shfmt',
+                'taplo',
+                'clang-format',
             })
             require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

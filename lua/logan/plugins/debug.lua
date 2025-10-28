@@ -19,7 +19,7 @@ return {
         'jay-babu/mason-nvim-dap.nvim',
 
         -- Add your own debuggers here
-        'leoluz/nvim-dap-go',
+        -- 'leoluz/nvim-dap-go',
     },
     keys = {
         -- Basic debugging keymaps.
@@ -82,6 +82,7 @@ return {
             -- Makes a best effort to setup the various debuggers with
             -- reasonable debug configurations
             automatic_installation = true,
+            automatic_setup = true,
 
             -- You can provide additional configuration to the handlers,
             -- see mason-nvim-dap README for more information
@@ -90,15 +91,36 @@ return {
             -- You'll need to check that you have the required things installed
             ensure_installed = {
                 -- Update this to ensure that you have the debuggers for the langs you want
-                'delve',
+                -- 'delve',
+                'codelldb',
             },
         }
 
         -- Dap UI setup
         dapui.setup {
+            layouts = {
+                {
+                    elements = {
+                        { id = 'scopes', size = 0.7 },
+                        { id = 'breakpoints', size = 0.3 },
+                    },
+                    size = 40,
+                    position = 'left',
+                },
+                {
+                    elements = {
+                        { id = 'repl', size = 0.4 },
+                        { id = 'console', size = 0.6 },
+                    },
+                    size = 10,
+                    position = 'bottom',
+                },
+            },
             -- Set icons to characters that are more likely to work in every terminal.
             icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
             controls = {
+                enabled = true,
+                element = 'repl',
                 icons = {
                     pause = '⏸',
                     play = '▶',
@@ -129,13 +151,29 @@ return {
         dap.listeners.before.event_terminated['dapui_config'] = dapui.close
         dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
-        -- Install golang specific config
-        require('dap-go').setup {
-            delve = {
-                -- On Windows delve must be run attached or it crashes.
-                -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-                detached = vim.fn.has 'win32' == 0,
+        -- C++ setup with 'codelldb'
+        dap.configurations.cpp = {
+            {
+                name = 'Launch main',
+                type = 'codelldb',
+                request = 'launch',
+                program = '${workspaceFolder}/main',
+                cwd = '${workspaceFolder}',
+                stopOnEntry = false,
             },
         }
+
+        -- Reuse for C and Rust
+        dap.configurations.c = dap.configurations.cpp
+        dap.configurations.rust = dap.configurations.cpp
+
+        -- Install golang specific config
+        -- require('dap-go').setup {
+        -- delve = {
+        -- On Windows delve must be run attached or it crashes.
+        -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
+        -- detached = vim.fn.has 'win32' == 0,
+        -- },
+        -- }
     end,
 }

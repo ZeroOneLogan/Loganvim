@@ -44,6 +44,10 @@ return {
                 graphql = { 'prettier' },
                 liquid = { 'prettier' },
                 python = { 'isort', 'black' },
+                sh = { 'shfmt' },
+                bash = { 'shfmt' },
+                zsh = { 'shfmt' },
+                toml = { 'taplo' },
                 -- Conform can also run multiple formatters sequentially
                 -- python = { "isort", "black" },
                 --
