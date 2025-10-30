@@ -56,7 +56,11 @@ require('lazy').setup({
 
     require 'logan.plugins.neogit',
 
-    require 'logan.plugins.smear-cursor',
+    -- require 'logan.plugins.smear-cursor',
+
+    require 'logan.plugins.noice',
+
+    require 'logan.plugins.images',
 }, {
     ui = {
         icons = vim.g.have_nerd_font and {} or {

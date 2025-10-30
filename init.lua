@@ -37,4 +37,7 @@ if use_minimal_default_colors then
 else
     vim.cmd.colorscheme 'tokyonight-night'
 end
+
+-- python location
+vim.g.python3_host_prog = '/Users/drewlogan/.venvs/nvim/bin/python'
 -- vim: ts=2 sts=2 sw=2 et
