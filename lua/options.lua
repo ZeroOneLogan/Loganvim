@@ -13,7 +13,7 @@ vim.o.showmode = false
 
 -- Sync clipboard between OS and Neovim.
 vim.schedule(function()
-    vim.o.clipboard = 'unnamedplus'
+  vim.o.clipboard = 'unnamedplus'
 end)
 
 -- Enable break indent
@@ -59,5 +59,50 @@ vim.o.confirm = true
 
 -- Option for some color themes
 vim.opt.termguicolors = true
+
+-- * Use highlight groups for the cursor
+vim.opt.guicursor = table.concat({
+  'n-v-c:block-Cursor/lCursor',
+  'i-ci-ve:ver25-Cursor/lCursor',
+  'r-cr:hor20-Cursor/lCursor',
+  'o:hor50-Cursor/lCursor',
+  'sm:block-Cursor/lCursor',
+}, ',')
+
+-- * Recompute cursor colors whenever colorscheme changes
+local aug = vim.api.nvim_create_augroup('ColorColorSync', { clear = true })
+vim.api.nvim_create_autocmd('ColorScheme', {
+  group = aug,
+  callback = function()
+    local ok_bg = pcall(function()
+      local norm = vim.api.nvim_get_hl(0, { name = 'Normal', link = false })
+      local fg = norm.fg
+      local bg = norm.bg
+
+      if fg and bg then
+        vim.api.nvim_set_hl(0, 'Cursor', { fg = bg, bg = fg })
+        vim.api.nvim_set_hl(0, 'lCursor', { fg = bg, bg = fg })
+        vim.api.nvim_set_hl(0, 'TermCursor', { fg = bg, bg = fg })
+      else
+        vim.api.nvim_set_hl(0, 'Cursor', { reverse = true })
+        vim.api.nvim_set_hl(0, 'lCursor', { reverse = true })
+        vim.api.nvim_set_hl(0, 'TermCursor', { reverse = true })
+      end
+    end)
+    if not ok_bg then
+      vim.api.nvim_set_hl(0, 'Cursor', { reverse = true })
+      vim.api.nvim_set_hl(0, 'lCursor', { reverse = true })
+      vim.api.nvim_set_hl(0, 'TermCursor', { reverse = true })
+    end
+  end,
+})
+
+-- * Run once at startup so initial theme sets it too
+vim.schedule(function()
+  vim.api.nvim_exec_autocmds('ColorScheme', {})
+end)
+
+-- Remove command line to make noice better looking
+vim.opt.cmdheight = 0
 
 -- vim: ts=2 sts=2 sw=2 et

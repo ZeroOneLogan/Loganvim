@@ -23,19 +23,37 @@ require 'lazy-plugins'
 -- [[ Terminal pop ui ]]
 require 'logan.terminalpop'
 
-local use_minimal_default_colors = false
+-- local use_minimal_default_colors = false
 
-if use_minimal_default_colors then
-    vim.cmd.colorscheme 'default'
+-- if use_minimal_default_colors then
+-- vim.cmd.colorscheme 'default'
 
-    local mod = 'utils.colors'
-    if package.loaded[mod] then
-        package.loaded[mod] = nil
-    end
+-- local mod = 'utils.colors'
+-- if package.loaded[mod] then
+-- package.loaded[mod] = nil
+-- end
 
-    require(mod)
+-- require(mod)
+-- else
+-- vim.cmd.colorscheme 'tokyonight-night'
+-- end
+
+-- Save last used colorscheme to a file
+vim.api.nvim_create_autocmd('ColorScheme', {
+  callback = function()
+    local colorscheme = vim.g.colors_name
+    local path = vim.fn.stdpath 'config' .. '/last_colorscheme.txt'
+    vim.fn.writefile({ colorscheme }, path)
+  end,
+})
+
+-- Load last used colorscheme on startup
+local path = vim.fn.stdpath 'config' .. '/last_colorscheme.txt'
+if vim.fn.filereadable(path) == 1 then
+  local last_colorscheme = vim.fn.readfile(path)[1]
+  pcall(vim.cmd.colorscheme, last_colorscheme)
 else
-    vim.cmd.colorscheme 'tokyonight-night'
+  vim.cmd.colorscheme 'tokyonight-night' -- fallback
 end
 
 -- python location
