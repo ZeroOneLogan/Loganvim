@@ -56,6 +56,39 @@ else
   vim.cmd.colorscheme 'tokyonight-night' -- fallback
 end
 
+require('logan.theme').setup()
+
 -- python location
-vim.g.python3_host_prog = '/Users/drewlogan/.venvs/nvim/bin/python'
+-- vim.g.python3_host_prog = '/Users/drewlogan/.venvs/nvim/bin/python'
+local function has_pynvim(py)
+  if py == '' then
+    return false
+  end
+  local ok = vim.fn.system { py, '-c', 'import pynvim' }
+  return vim.v.shell_error == 0
+end
+
+local function detect_python_host()
+  local candidates = {
+    vim.fn.expand '~/.venvs/nvim/bin/python',
+    vim.env.NVIM_PYTHON3,
+    vim.env.NVIM_PYTHON,
+    (vim.env.VIRTUAL_ENV or '') ~= '' and (vim.env.VIRTUAL_ENV .. '/bin/python3') or nil,
+    vim.fn.exepath 'python3',
+  }
+  for _, p in ipairs(candidates) do
+    if p and has_pynvim(p) then
+      return p
+    end
+  end
+end
+
+local py = detect_python_host()
+if py then
+  vim.g.python3_host_prog = py
+else
+  vim.schedule(function()
+    vim.notify('No python with pynvim found for python3_host_prog', vim.log.levels.WARN)
+  end)
+end
 -- vim: ts=2 sts=2 sw=2 et

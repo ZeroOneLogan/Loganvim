@@ -1,43 +1,103 @@
 -- keymaps.lua --
 
--- Clear highlights on search when pressing <Esc> in normal mode
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+local map = vim.keymap.set
 
--- Diagnostic keymaps
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+-- Clear highlights on search when pressing <Esc> in normal mode
+map('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Diagnostic helpers
+map('n', '<leader>xq', vim.diagnostic.setloclist, { desc = 'Diagnostics quickfix list' })
+map('n', ']d', vim.diagnostic.goto_next, { desc = 'Next diagnostic' })
+map('n', '[d', vim.diagnostic.goto_prev, { desc = 'Prev diagnostic' })
+map('n', ']e', function()
+  vim.diagnostic.goto_next { severity = vim.diagnostic.severity.ERROR }
+end, { desc = 'Next error' })
+map('n', '[e', function()
+  vim.diagnostic.goto_prev { severity = vim.diagnostic.severity.ERROR }
+end, { desc = 'Prev error' })
+
+-- Quick saves / quits
+map({ 'n', 'i', 'v', 'x' }, '<C-s>', '<Esc><cmd>w<CR>', { desc = 'Save file', silent = true })
+map('n', '<leader>wq', '<cmd>wall | qa<CR>', { desc = 'Save all & quit' })
+
+-- Buffer management
+map('n', '<leader>bn', '<cmd>enew<CR>', { desc = 'Buffer: new' })
+map('n', '<leader>bd', '<cmd>bdelete<CR>', { desc = 'Buffer: delete' })
+map('n', '<leader>bo', function()
+  local current = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted and buf ~= current then
+      if vim.bo[buf].modified then
+        vim.notify(string.format('Skipped closing %s (unsaved changes)', vim.api.nvim_buf_get_name(buf)), vim.log.levels.WARN)
+      else
+        vim.api.nvim_buf_delete(buf, {})
+      end
+    end
+  end
+end, { desc = 'Buffer: close others' })
+
+map('n', ']b', function()
+  require('bufferline').cycle(1)
+end, { desc = 'Buffer: next tab' })
+map('n', '[b', function()
+  require('bufferline').cycle(-1)
+end, { desc = 'Buffer: previous tab' })
+map('n', '<leader>bp', function()
+  require('bufferline').pick()
+end, { desc = 'Buffer: pick tab' })
+map('n', '<leader>b<', function()
+  require('bufferline').move(-1)
+end, { desc = 'Buffer: move left' })
+map('n', '<leader>b>', function()
+  require('bufferline').move(1)
+end, { desc = 'Buffer: move right' })
+
+-- Centered scrolling
+map('n', '<C-d>', '<C-d>zz')
+map('n', '<C-u>', '<C-u>zz')
+map('n', 'n', 'nzzzv')
+map('n', 'N', 'Nzzzv')
 
 -- <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+-- Window navigation (still works inside tmux thanks to smart-splits)
+map('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+map('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+map('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+map('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+map('n', '<leader>wr', function()
+  require('smart-splits').start_resize_mode()
+end, { desc = 'Resize mode' })
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Toggle helpers
+map('n', '<leader>uw', function()
+  vim.wo.wrap = not vim.wo.wrap
+  vim.notify('Wrap ' .. (vim.wo.wrap and 'enabled' or 'disabled'))
+end, { desc = 'Toggle wrap' })
 
--- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
--- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
--- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
--- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
--- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+map('n', '<leader>un', function()
+  vim.wo.relativenumber = not vim.wo.relativenumber
+  vim.notify('Relative number ' .. (vim.wo.relativenumber and 'enabled' or 'disabled'))
+end, { desc = 'Toggle relative numbers' })
 
--- [[ Basic Autocommands ]]
+map('n', '<leader>us', function()
+  vim.opt.spell = not vim.opt.spell:get()
+  vim.notify('Spell ' .. (vim.opt.spell:get() and 'enabled' or 'disabled'))
+end, { desc = 'Toggle spell' })
+
+map('n', '<leader>ut', function()
+  require('mini.trailspace').trim()
+  vim.notify 'Trailing whitespace trimmed'
+end, { desc = 'Trim trailing whitespace' })
 
 -- Highlight when yanking (copying) text
---  Works with `yap` in normal mode
 vim.api.nvim_create_autocmd('TextYankPost', {
-    desc = 'Highlight when yanking (copying) text',
-    group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-    callback = function()
-        vim.hl.on_yank()
-    end,
+  desc = 'Highlight when yanking (copying) text',
+  group = vim.api.nvim_create_augroup('logan-highlight-yank', { clear = true }),
+  callback = function()
+    vim.hl.on_yank()
+  end,
 })
 
 -- vim: ts=2 sts=2 sw=2 et
