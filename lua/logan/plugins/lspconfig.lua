@@ -28,6 +28,7 @@ return {
 
       -- Allows extra capabilities provided by blink.cmp
       'saghen/blink.cmp',
+      'b0o/schemastore.nvim',
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -204,6 +205,13 @@ return {
       --  So, we create new capabilities with blink.cmp, and then broadcast that to the servers.
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
+      local function disable_formatting(client)
+        client.server_capabilities.documentFormattingProvider = false
+        client.server_capabilities.documentRangeFormattingProvider = false
+      end
+
+      local schemastore_ok, schemastore = pcall(require, 'schemastore')
+
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --
@@ -224,7 +232,16 @@ return {
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        ts_ls = {},
+        ts_ls = {
+          on_attach = function(client)
+            disable_formatting(client)
+          end,
+          settings = {
+            completions = { completeFunctionCalls = true },
+            javascript = { format = { enable = false } },
+            typescript = { format = { enable = false } },
+          },
+        },
         html = {},
         cssls = {},
         tailwindcss = {},
@@ -234,8 +251,34 @@ return {
         prismals = {},
         pyright = {},
         bashls = {},
-        jsonls = {},
-        clangd = {},
+        jsonls = schemastore_ok and {
+          settings = {
+            json = {
+              schemas = schemastore.json.schemas(),
+              validate = { enable = true },
+            },
+          },
+        } or {},
+        clangd = {
+          cmd = {
+            'clangd',
+            '--background-index',
+            '--clang-tidy',
+            '--completion-style=detailed',
+            '--function-arg-placeholders',
+            '--fallback-style=llvm',
+          },
+          init_options = {
+            clangdFileStatus = true,
+            semanticHighlighting = true,
+          },
+          on_attach = function(client)
+            disable_formatting(client)
+          end,
+          -- Copilot's LSP client reports utf-16 offsets, so keep clangd aligned
+          -- to avoid "multiple offset_encodings" errors on C/C++ buffers.
+          capabilities = { offsetEncoding = { 'utf-16' } },
+        },
         --
 
         lua_ls = {
@@ -274,10 +317,11 @@ return {
         'isort',
         'black',
         'pylint',
+        'ruff',
         'eslint_d',
-        'eslint',
         'markdownlint-cli2',
         'shfmt',
+        'shellcheck',
         'taplo',
         'clang-format',
       })
