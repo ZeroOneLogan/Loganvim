@@ -1,5 +1,64 @@
 local M = {}
 
+local scheme_providers = {
+  tokyonight = 'tokyonight',
+  ['tokyonight-day'] = 'tokyonight',
+  ['tokyonight-moon'] = 'tokyonight',
+  ['tokyonight-night'] = 'tokyonight',
+  ['tokyonight-storm'] = 'tokyonight',
+  catppuccin = 'catppuccin',
+  ['catppuccin-latte'] = 'catppuccin',
+  ['catppuccin-frappe'] = 'catppuccin',
+  ['catppuccin-macchiato'] = 'catppuccin',
+  ['catppuccin-mocha'] = 'catppuccin',
+  vscode = 'vscode',
+  ['vscode-dark'] = 'vscode',
+  ['vscode-dark-plus'] = 'vscode',
+  ['vscode-light'] = 'vscode',
+  ['vscode-light-plus'] = 'vscode',
+  ['github_dark'] = 'github-theme',
+  ['github_dark_colorblind'] = 'github-theme',
+  ['github_dark_default'] = 'github-theme',
+  ['github_dark_dimmed'] = 'github-theme',
+  ['github_dark_high_contrast'] = 'github-theme',
+  ['github_dark_tritanopia'] = 'github-theme',
+  ['github_light'] = 'github-theme',
+  ['github_light_colorblind'] = 'github-theme',
+  ['github_light_default'] = 'github-theme',
+  ['github_light_high_contrast'] = 'github-theme',
+  ['github_light_tritanopia'] = 'github-theme',
+  sequoia = 'sequoia',
+  nord = 'nord',
+  nightfox = 'nightfox',
+  dayfox = 'nightfox',
+  dawnfox = 'nightfox',
+  duskfox = 'nightfox',
+  terafox = 'nightfox',
+  carbonfox = 'nightfox',
+  alabaster = 'alabaster',
+  rusty = 'rusty',
+  ['night-owl'] = 'night-owl',
+  kanagawa = 'kanagawa',
+  ['kanagawa-dragon'] = 'kanagawa',
+  ['kanagawa-lotus'] = 'kanagawa',
+  ['kanagawa-wave'] = 'kanagawa',
+  onedark = 'onedarkpro',
+  ['onedark_dark'] = 'onedarkpro',
+  ['onedark_vivid'] = 'onedarkpro',
+  onedarker = 'onedarkpro',
+  onelight = 'onedarkpro',
+  everforest = 'everforest',
+  ['everforest-hard'] = 'everforest',
+  ['everforest-medium'] = 'everforest',
+  ['everforest-soft'] = 'everforest',
+  ['rose-pine'] = 'rose-pine',
+  ['rose-pine-moon'] = 'rose-pine',
+  ['rose-pine-dawn'] = 'rose-pine',
+  dracula = 'dracula',
+  lackluster = 'lackluster',
+  oscura = 'oscura',
+}
+
 local palette = {
   dark = {
     float_bg = '#11111b',
@@ -34,6 +93,37 @@ local function set_hl(group, values)
   vim.api.nvim_set_hl(0, group, values)
 end
 
+local function ensure_provider_loaded(scheme)
+  local provider = scheme_providers[scheme]
+  if not provider then
+    return
+  end
+  local ok_config, lazy_config = pcall(require, 'lazy.core.config')
+  if not ok_config then
+    return
+  end
+  if not lazy_config.plugins or not lazy_config.plugins[provider] then
+    return
+  end
+  local ok, lazy = pcall(require, 'lazy')
+  if not ok then
+    return
+  end
+  lazy.load { plugins = { provider } }
+end
+
+function M.load_colorscheme(scheme)
+  if not scheme or scheme == '' then
+    return false
+  end
+  ensure_provider_loaded(scheme)
+  local ok, err = pcall(vim.cmd.colorscheme, scheme)
+  if not ok then
+    vim.notify(err, vim.log.levels.WARN)
+  end
+  return ok
+end
+
 function M.apply()
   local variant = palette[vim.o.background] or palette.dark
   local ok, normal = pcall(vim.api.nvim_get_hl, 0, { name = 'Normal', link = false })
@@ -59,6 +149,15 @@ end
 
 function M.setup()
   M.apply()
+  if not vim.g.logan_colorscheme_loader then
+    vim.g.logan_colorscheme_loader = true
+    vim.api.nvim_create_autocmd('ColorSchemePre', {
+      group = vim.api.nvim_create_augroup('LoganColorschemePre', { clear = true }),
+      callback = function(event)
+        ensure_provider_loaded(event.match)
+      end,
+    })
+  end
   vim.api.nvim_create_autocmd('ColorScheme', {
     group = vim.api.nvim_create_augroup('LoganTheme', { clear = true }),
     callback = M.apply,

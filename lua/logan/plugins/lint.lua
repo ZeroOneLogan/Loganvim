@@ -104,17 +104,17 @@ return {
       local lint = require 'lint'
       lint.linters_by_ft = {
         markdown = { 'markdownlint-cli2' },
-        python = { 'ruff', 'pylint' },
+        python = { 'ruff' },
         javascript = { 'eslint_d' },
         javascriptreact = { 'eslint_d' },
         typescript = { 'eslint_d' },
         typescriptreact = { 'eslint_d' },
         svelte = { 'eslint_d' },
         vue = { 'eslint_d' },
-        c = nil,
-        cpp = nil,
-        objc = nil,
-        objcpp = nil,
+        c = { 'clangtidy' },
+        cpp = { 'clangtidy' },
+        objc = { 'clangtidy' },
+        objcpp = { 'clangtidy' },
         bash = { 'shellcheck' },
         sh = { 'shellcheck' },
       }
@@ -150,7 +150,7 @@ return {
       })
 
       local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
-      vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
+      vim.api.nvim_create_autocmd({ 'BufWritePost', 'InsertLeave' }, {
         group = lint_augroup,
         callback = function()
           if vim.bo.modifiable then
@@ -158,6 +158,14 @@ return {
           end
         end,
       })
+
+      vim.api.nvim_create_user_command('LintPylint', function()
+        if vim.fn.executable 'pylint' ~= 1 then
+          vim.notify('pylint executable not found in PATH', vim.log.levels.WARN)
+          return
+        end
+        lint.try_lint { 'pylint' }
+      end, { desc = 'Run pylint once (heavy)' })
     end,
   },
 }

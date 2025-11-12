@@ -23,19 +23,17 @@ return {
         'graphql',
         'dockerfile',
         'gitignore',
-        'query',
         'diff',
         'html',
         'lua',
         'luadoc',
         'markdown',
         'markdown_inline',
-        'query',
         'vim',
         'vimdoc',
       },
       -- Autoinstall languages that are not installed
-      auto_install = true,
+      auto_install = false,
       highlight = {
         enable = true,
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
@@ -138,7 +136,7 @@ return {
         desc = 'TS Context: Toggle',
       },
       {
-        '[c',
+        '<leader>tp',
         function()
           require('treesitter-context').go_to_context()
         end,

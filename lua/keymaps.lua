@@ -36,21 +36,7 @@ map('n', '<leader>bo', function()
   end
 end, { desc = 'Buffer: close others' })
 
-map('n', ']b', function()
-  require('bufferline').cycle(1)
-end, { desc = 'Buffer: next tab' })
-map('n', '[b', function()
-  require('bufferline').cycle(-1)
-end, { desc = 'Buffer: previous tab' })
-map('n', '<leader>bp', function()
-  require('bufferline').pick()
-end, { desc = 'Buffer: pick tab' })
-map('n', '<leader>b<', function()
-  require('bufferline').move(-1)
-end, { desc = 'Buffer: move left' })
-map('n', '<leader>b>', function()
-  require('bufferline').move(1)
-end, { desc = 'Buffer: move right' })
+-- Bufferline-specific mappings are registered inside its plugin spec
 
 -- Centered scrolling
 map('n', '<C-d>', '<C-d>zz')
@@ -66,9 +52,7 @@ map('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 map('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 map('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 map('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-map('n', '<leader>wr', function()
-  require('smart-splits').start_resize_mode()
-end, { desc = 'Resize mode' })
+-- Split resize/management mappings live with the smart-splits plugin
 
 -- Toggle helpers
 map('n', '<leader>uw', function()

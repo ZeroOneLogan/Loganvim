@@ -3,11 +3,48 @@ return {
   version = '*',
   event = 'VeryLazy',
   dependencies = { 'nvim-tree/nvim-web-devicons' },
+  keys = {
+    {
+      ']b',
+      function()
+        require('bufferline').cycle(1)
+      end,
+      desc = 'Buffer: next',
+    },
+    {
+      '[b',
+      function()
+        require('bufferline').cycle(-1)
+      end,
+      desc = 'Buffer: previous',
+    },
+    {
+      '<leader>bp',
+      function()
+        require('bufferline').pick()
+      end,
+      desc = 'Buffer: pick',
+    },
+    {
+      '<leader>b<',
+      function()
+        require('bufferline').move(-1)
+      end,
+      desc = 'Buffer: move left',
+    },
+    {
+      '<leader>b>',
+      function()
+        require('bufferline').move(1)
+      end,
+      desc = 'Buffer: move right',
+    },
+  },
   opts = function()
     local bufferline = require 'bufferline'
     return {
       options = {
-        mode = 'tabs',
+        mode = 'buffers',
         style_preset = bufferline.style_preset.minimal,
         show_close_icon = false,
         show_buffer_close_icons = false,

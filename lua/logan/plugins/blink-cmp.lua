@@ -2,7 +2,7 @@ return {
   -- Copilot client
   {
     'zbirenbaum/copilot.lua',
-    lazy = false,
+    event = 'InsertEnter',
     opts = {
       suggestion = { enabled = false },
       panel = { enabled = false },
@@ -10,11 +10,9 @@ return {
   },
   { -- Autocompletion
     'saghen/blink.cmp',
-    event = 'VimEnter',
+    event = { 'InsertEnter', 'CmdlineEnter' },
     version = '1.*',
     dependencies = {
-      -- Snippet Engine
-      -- {
       'fang2hou/blink-copilot',
       'L3MON4D3/LuaSnip',
       -- version = '2.*',
@@ -46,12 +44,21 @@ return {
           require('luasnip.loaders.from_vscode').lazy_load()
         end,
       },
-      'folke/lazydev.nvim',
     },
     --- @module 'blink.cmp'
     --- @type blink.cmp.Config
     opts = {
       keymap = {
+        ['<Tab>'] = {
+          'snippet_forward',
+          function() -- sidekick next edit suggestion
+            return require('sidekick').nes_jump_or_apply()
+          end,
+          function() -- if using neovim native inline completions
+            return vim.lsp.inline_completion and vim.lsp.inline_completion.get()
+          end,
+          'fallback',
+        },
         -- 'default' (recommended) for mappings similar to built-in completions
         --   <c-y> to accept ([y]es) the completion.
         --    This will auto-import if your LSP supports it.

@@ -47,19 +47,23 @@ vim.api.nvim_create_autocmd('ColorScheme', {
   end,
 })
 
+local theme = require 'logan.theme'
+
 -- Load last used colorscheme on startup
 local path = vim.fn.stdpath 'config' .. '/last_colorscheme.txt'
 if vim.fn.filereadable(path) == 1 then
   local last_colorscheme = vim.fn.readfile(path)[1]
-  pcall(vim.cmd.colorscheme, last_colorscheme)
+  if not theme.load_colorscheme(last_colorscheme) then
+    theme.load_colorscheme 'tokyonight-night'
+  end
 else
-  vim.cmd.colorscheme 'tokyonight-night' -- fallback
+  theme.load_colorscheme 'tokyonight-night' -- fallback
 end
 
-require('logan.theme').setup()
+theme.setup()
 
 -- python location
--- vim.g.python3_host_prog = '/Users/drewlogan/.venvs/nvim/bin/python'
+-- vim.g.python3_host_prog = '/Users/drewlogan/.virtualenvs/nvim-py3/bin/python'
 local function has_pynvim(py)
   if py == '' then
     return false
@@ -70,7 +74,7 @@ end
 
 local function detect_python_host()
   local candidates = {
-    vim.fn.expand '~/.venvs/nvim/bin/python',
+    vim.fn.expand '~/.virtualenvs/nvim-py3/bin/python',
     vim.env.NVIM_PYTHON3,
     vim.env.NVIM_PYTHON,
     (vim.env.VIRTUAL_ENV or '') ~= '' and (vim.env.VIRTUAL_ENV .. '/bin/python3') or nil,

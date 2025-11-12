@@ -50,6 +50,7 @@ require('lazy').setup({
   require 'logan.plugins.spectre',
   require 'logan.plugins.ufo',
   require 'logan.plugins.notify',
+  require 'logan.plugins.sidekick',
 }, {
   ui = {
     icons = vim.g.have_nerd_font and {} or {

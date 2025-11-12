@@ -6,9 +6,16 @@ return {
     'nvim-tree/nvim-web-devicons',
     'MunifTanjim/nui.nvim',
   },
-  lazy = false,
+  cmd = { 'Neotree' },
   keys = {
-    { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
+    {
+      '\\',
+      function()
+        require('neo-tree.command').execute { action = 'focus', toggle = true, reveal = true }
+      end,
+      desc = 'Neo-tree focus/toggle',
+      silent = true,
+    },
   },
   opts = {
     close_if_last_window = true,

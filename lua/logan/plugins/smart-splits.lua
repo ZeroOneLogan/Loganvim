@@ -12,9 +12,18 @@ return {
         silent = true,
         hooks = {
           on_leave = function()
-            vim.notify('Resize mode exited', vim.log.levels.INFO)
+            vim.notify_once('Resize mode exited', vim.log.levels.INFO)
           end,
         },
+      },
+    },
+    keys = {
+      {
+        '<leader>wr',
+        function()
+          require('smart-splits').start_resize_mode()
+        end,
+        desc = 'Resize windows',
       },
     },
     config = function(_, opts)

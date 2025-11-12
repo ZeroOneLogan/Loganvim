@@ -15,7 +15,7 @@
 return {
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+    event = 'VeryLazy', -- defer until the UI is ready
     opts = {
       -- delay between pressing a key and opening which-key (milliseconds)
       -- this setting is independent of vim.o.timeoutlen
@@ -59,6 +59,20 @@ return {
 
       -- Document existing key chains
       spec = {
+        { '<leader>a', group = '[A]I / Sidekick' },
+        { '<leader>aa', desc = 'Sidekick Toggle CLI' },
+        { '<leader>ac', desc = 'Sidekick Toggle Codex' },
+        { '<leader>au', desc = 'Sidekick Toggle Cursor' },
+        { '<leader>ad', desc = 'Sidekick Detach CLI' },
+        { '<leader>ae', desc = 'Sidekick Apply Edit' },
+        { '<leader>af', desc = 'Sidekick Send File' },
+        { '<leader>aj', desc = 'Sidekick Jump to Edit' },
+        { '<leader>an', desc = 'Sidekick Refresh Suggestions' },
+        { '<leader>ap', desc = 'Sidekick Select Prompt', mode = { 'n', 'x' } },
+        { '<leader>as', desc = 'Sidekick Select CLI' },
+        { '<leader>at', desc = 'Sidekick Send This', mode = { 'n', 'x' } },
+        { '<leader>av', desc = 'Sidekick Send Visual Selection', mode = { 'x' } },
+        { '<leader>ao', desc = 'Toggle Sidekick NES' },
         { '<leader>s', group = '[S]earch' },
         { '<leader>b', group = '[B]uffer' },
         { '<leader>w', group = '[W]indow' },
@@ -153,7 +167,7 @@ return {
         { 'gP', desc = 'Peek Class Definition' },
 
         --- Context Navigation
-        { '[c', desc = 'Go to parent context' },
+        { '<leader>tp', desc = 'TS Context: Go to parent' },
       },
     },
   },
