@@ -51,6 +51,8 @@ require('lazy').setup({
   require 'logan.plugins.ufo',
   require 'logan.plugins.notify',
   require 'logan.plugins.sidekick',
+  require 'logan.plugins.overseer',
+  require 'logan.plugins.cmake-tools',
 }, {
   ui = {
     icons = vim.g.have_nerd_font and {} or {
