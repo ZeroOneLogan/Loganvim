@@ -1,229 +1,462 @@
--- NOTE: Plugins can specify dependencies.
---
--- The dependencies are proper plugin specifications as well - anything
--- you do for a plugin at the top level, you can do for a dependency.
---
--- Use the `dependencies` key to specify the dependencies of a particular plugin
+-- telescope.lua --
+-- Ultimate Fuzzy Finder Configuration
+-- Fast, feature-rich, and beautifully integrated
 
 return {
-  { -- Fuzzy Finder (files, lsp, etc)
-    'nvim-telescope/telescope.nvim',
-    cmd = 'Telescope',
-    keys = {
-      {
-        '<leader>sh',
-        function()
-          require('telescope.builtin').help_tags()
-        end,
-        desc = '[S]earch [H]elp',
-      },
-      {
-        '<leader>sk',
-        function()
-          require('telescope.builtin').keymaps()
-        end,
-        desc = '[S]earch [K]eymaps',
-      },
-      {
-        '<leader>sf',
-        function()
-          require('telescope.builtin').find_files()
-        end,
-        desc = '[S]earch [F]iles',
-      },
-      {
-        '<leader>ss',
-        function()
-          require('telescope.builtin').builtin()
-        end,
-        desc = '[S]earch [S]elect Telescope',
-      },
-      {
-        '<leader>sw',
-        function()
-          require('telescope.builtin').grep_string()
-        end,
-        desc = '[S]earch current [W]ord',
-      },
-      {
-        '<leader>sg',
-        function()
-          require('telescope.builtin').live_grep()
-        end,
-        desc = '[S]earch by [G]rep',
-      },
-      {
-        '<leader>sd',
-        function()
-          require('telescope.builtin').diagnostics()
-        end,
-        desc = '[S]earch [D]iagnostics',
-      },
-      {
-        '<leader>sr',
-        function()
-          require('telescope.builtin').resume()
-        end,
-        desc = '[S]earch [R]esume',
-      },
-      {
-        '<leader>s.',
-        function()
-          require('telescope.builtin').oldfiles()
-        end,
-        desc = '[S]earch Recent Files',
-      },
-      {
-        '<leader><leader>',
-        function()
-          require('telescope.builtin').buffers()
-        end,
-        desc = 'Find existing buffers',
-      },
-      {
-        '<leader>/',
-        function()
-          require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+  'nvim-telescope/telescope.nvim',
+  cmd = 'Telescope',
+  version = false,
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+    {
+      'nvim-telescope/telescope-fzf-native.nvim',
+      build = 'make',
+      cond = function()
+        return vim.fn.executable('make') == 1
+      end,
+    },
+    'nvim-telescope/telescope-ui-select.nvim',
+    'nvim-telescope/telescope-file-browser.nvim',
+    { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+  },
+  keys = {
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                     File Search                        │
+    --  ╰────────────────────────────────────────────────────────╯
+
+    {
+      '<leader>sf',
+      function()
+        require('telescope.builtin').find_files()
+      end,
+      desc = 'Search files',
+    },
+    {
+      '<leader>sF',
+      function()
+        require('telescope.builtin').find_files({ hidden = true, no_ignore = true })
+      end,
+      desc = 'Search all files',
+    },
+    {
+      '<leader>s.',
+      function()
+        require('telescope.builtin').oldfiles()
+      end,
+      desc = 'Recent files',
+    },
+    {
+      '<leader>sn',
+      function()
+        require('telescope.builtin').find_files({ cwd = vim.fn.stdpath('config') })
+      end,
+      desc = 'Neovim config files',
+    },
+
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                     Text Search                        │
+    --  ╰────────────────────────────────────────────────────────╯
+
+    {
+      '<leader>sg',
+      function()
+        require('telescope.builtin').live_grep()
+      end,
+      desc = 'Live grep',
+    },
+    {
+      '<leader>sG',
+      function()
+        require('telescope.builtin').live_grep({
+          additional_args = function()
+            return { '--hidden', '--no-ignore' }
+          end,
+        })
+      end,
+      desc = 'Live grep (all files)',
+    },
+    {
+      '<leader>sw',
+      function()
+        require('telescope.builtin').grep_string()
+      end,
+      desc = 'Search current word',
+    },
+    {
+      '<leader>s/',
+      function()
+        require('telescope.builtin').live_grep({
+          grep_open_files = true,
+          prompt_title = 'Live Grep in Open Files',
+        })
+      end,
+      desc = 'Search in open files',
+    },
+    {
+      '<leader>/',
+      function()
+        require('telescope.builtin').current_buffer_fuzzy_find(
+          require('telescope.themes').get_dropdown({
             winblend = 10,
             previewer = true,
           })
-        end,
-        desc = 'Fuzzy search buffer',
-      },
-      {
-        '<leader>s/',
-        function()
-          require('telescope.builtin').live_grep {
-            grep_open_files = true,
-            prompt_title = 'Live Grep in Open Files',
-          }
-        end,
-        desc = '[S]earch [/] in Open Files',
-      },
-      {
-        '<leader>sn',
-        function()
-          require('telescope.builtin').find_files { cwd = vim.fn.stdpath 'config' }
-        end,
-        desc = '[S]earch [N]eovim files',
-      },
+        )
+      end,
+      desc = 'Fuzzy search buffer',
     },
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      { -- If encountering errors, see telescope-fzf-native README for installation instructions
-        'nvim-telescope/telescope-fzf-native.nvim',
 
-        -- `build` is used to run some command when the plugin is installed/updated.
-        -- This is only run then, not every time Neovim starts up.
-        build = 'make',
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                   Buffer & Tabs                        │
+    --  ╰────────────────────────────────────────────────────────╯
 
-        -- `cond` is a condition used to determine whether this plugin should be
-        -- installed and loaded.
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
-      },
-      { 'nvim-telescope/telescope-ui-select.nvim' },
-
-      -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+    {
+      '<leader><leader>',
+      function()
+        require('telescope.builtin').buffers({
+          sort_lastused = true,
+          sort_mru = true,
+        })
+      end,
+      desc = 'Switch buffers',
     },
-    config = function()
-      local telescope = require 'telescope'
-      local actions = require 'telescope.actions'
-      local function flash_jump(prompt_bufnr)
-        local ok, flash = pcall(require, 'flash')
-        if not ok then
-          return
-        end
-        flash.jump {
-          pattern = '^',
-          label = { after = { 0, 0 } },
-          search = {
-            mode = 'search',
-            exclude = {
-              function(win)
-                return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= 'TelescopeResults'
-              end,
-            },
-          },
-          action = function(match)
-            local picker = require('telescope.actions.state').get_current_picker(prompt_bufnr)
-            picker:set_selection(match.pos[1] - 1)
-          end,
-        }
-      end
+    {
+      '<leader>sb',
+      function()
+        require('telescope.builtin').buffers()
+      end,
+      desc = 'Search buffers',
+    },
 
-      -- Telescope is a fuzzy finder that comes with a lot of different things that
-      -- it can fuzzy find! It's more than just a "file finder", it can search
-      -- many different aspects of Neovim, your workspace, LSP, and more!
-      -- The easiest way to use Telescope, is to start by doing something like:
-      --  :Telescope help_tags
-      --
-      -- After running this command, a window will open up and you're able to
-      -- type in the prompt window. You'll see a list of `help_tags` options and
-      -- a corresponding preview of the help.
-      --
-      -- Two important keymaps to use while in Telescope are:
-      --  - Insert mode: <c-/>
-      --  - Normal mode: ?
-      --
-      -- This opens a window that shows you all of the keymaps for the current
-      -- Telescope picker. This is really useful to discover what Telescope can
-      -- do as well as how to actually do it!
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                     Help & Docs                        │
+    --  ╰────────────────────────────────────────────────────────╯
 
-      -- [[ Configure Telescope ]]
-      -- See `:help telescope` and `:help telescope.setup()`
-      telescope.setup {
-        defaults = {
-          prompt_prefix = '   ',
-          selection_caret = '❯ ',
-          sorting_strategy = 'ascending',
-          layout_strategy = 'flex',
-          layout_config = {
-            horizontal = { prompt_position = 'top', preview_width = 0.55 },
-            vertical = { mirror = false },
-            width = 0.92,
-            height = 0.88,
-          },
-          path_display = { 'filename_first' },
-          winblend = 0,
-          mappings = {
-            i = {
-              ['<C-j>'] = actions.move_selection_next,
-              ['<C-k>'] = actions.move_selection_previous,
-              ['<C-d>'] = actions.delete_buffer,
-              ['<C-q>'] = function(...)
-                actions.smart_send_to_qflist(...)
-                actions.open_qflist(...)
-              end,
-              ['<C-s>'] = flash_jump,
-            },
-            n = {
-              ['q'] = actions.close,
-              s = flash_jump,
-            },
-          },
-        },
-        pickers = {
-          find_files = { hidden = true },
-          live_grep = {
-            additional_args = function()
-              return { '--hidden', '--glob', '!.git/' }
+    {
+      '<leader>sh',
+      function()
+        require('telescope.builtin').help_tags()
+      end,
+      desc = 'Search help',
+    },
+    {
+      '<leader>sH',
+      function()
+        require('telescope.builtin').highlights()
+      end,
+      desc = 'Search highlights',
+    },
+    {
+      '<leader>sm',
+      function()
+        require('telescope.builtin').man_pages()
+      end,
+      desc = 'Man pages',
+    },
+
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                     Vim Internals                      │
+    --  ╰────────────────────────────────────────────────────────╯
+
+    {
+      '<leader>sk',
+      function()
+        require('telescope.builtin').keymaps()
+      end,
+      desc = 'Search keymaps',
+    },
+    {
+      '<leader>sc',
+      function()
+        require('telescope.builtin').commands()
+      end,
+      desc = 'Search commands',
+    },
+    {
+      '<leader>:',
+      function()
+        require('telescope.builtin').command_history()
+      end,
+      desc = 'Command history',
+    },
+    {
+      '<leader>so',
+      function()
+        require('telescope.builtin').vim_options()
+      end,
+      desc = 'Vim options',
+    },
+    {
+      '<leader>sM',
+      function()
+        require('telescope.builtin').marks()
+      end,
+      desc = 'Search marks',
+    },
+    {
+      '<leader>sj',
+      function()
+        require('telescope.builtin').jumplist()
+      end,
+      desc = 'Jump list',
+    },
+    {
+      '<leader>sr',
+      function()
+        require('telescope.builtin').resume()
+      end,
+      desc = 'Resume last search',
+    },
+    {
+      '<leader>ss',
+      function()
+        require('telescope.builtin').builtin()
+      end,
+      desc = 'Select Telescope picker',
+    },
+
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                     Diagnostics                        │
+    --  ╰────────────────────────────────────────────────────────╯
+
+    {
+      '<leader>sd',
+      function()
+        require('telescope.builtin').diagnostics({ bufnr = 0 })
+      end,
+      desc = 'Buffer diagnostics',
+    },
+    {
+      '<leader>sD',
+      function()
+        require('telescope.builtin').diagnostics()
+      end,
+      desc = 'Workspace diagnostics',
+    },
+
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                     Git Search                         │
+    --  ╰────────────────────────────────────────────────────────╯
+
+    {
+      '<leader>gc',
+      function()
+        require('telescope.builtin').git_commits()
+      end,
+      desc = 'Git commits',
+    },
+    {
+      '<leader>gs',
+      function()
+        require('telescope.builtin').git_status()
+      end,
+      desc = 'Git status',
+    },
+    {
+      '<leader>gB',
+      function()
+        require('telescope.builtin').git_branches()
+      end,
+      desc = 'Git branches',
+    },
+
+    --  ╭────────────────────────────────────────────────────────╮
+    --  │                   File Browser                         │
+    --  ╰────────────────────────────────────────────────────────╯
+
+    {
+      '<leader>fe',
+      function()
+        require('telescope').extensions.file_browser.file_browser({
+          path = '%:p:h',
+          select_buffer = true,
+        })
+      end,
+      desc = 'File browser',
+    },
+  },
+
+  config = function()
+    local telescope = require('telescope')
+    local actions = require('telescope.actions')
+
+    --  ╭──────────────────────────────────────────────────────────╮
+    --  │                   Flash Integration                      │
+    --  ╰──────────────────────────────────────────────────────────╯
+
+    local function flash_jump(prompt_bufnr)
+      local ok, flash = pcall(require, 'flash')
+      if not ok then return end
+
+      flash.jump({
+        pattern = '^',
+        label = { after = { 0, 0 } },
+        search = {
+          mode = 'search',
+          exclude = {
+            function(win)
+              return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= 'TelescopeResults'
             end,
           },
         },
-        extensions = {
-          ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
+        action = function(match)
+          local picker = require('telescope.actions.state').get_current_picker(prompt_bufnr)
+          picker:set_selection(match.pos[1] - 1)
+        end,
+      })
+    end
+
+    --  ╭──────────────────────────────────────────────────────────╮
+    --  │                      Setup                               │
+    --  ╰──────────────────────────────────────────────────────────╯
+
+    telescope.setup({
+      defaults = {
+        prompt_prefix = '   ',
+        selection_caret = '  ',
+        entry_prefix = '   ',
+        multi_icon = ' + ',
+        sorting_strategy = 'ascending',
+        layout_strategy = 'flex',
+        layout_config = {
+          horizontal = {
+            prompt_position = 'top',
+            preview_width = 0.55,
+            results_width = 0.8,
+          },
+          vertical = {
+            mirror = false,
+          },
+          width = 0.90,
+          height = 0.85,
+          preview_cutoff = 120,
+        },
+        path_display = { 'filename_first' },
+        file_ignore_patterns = {
+          '%.git/',
+          'node_modules/',
+          '__pycache__/',
+          '%.cache/',
+          '%.next/',
+          'dist/',
+          'build/',
+          '%.o',
+          '%.a',
+          '%.out',
+          '%.class',
+          '%.pdf',
+          '%.mkv',
+          '%.mp4',
+          '%.zip',
+        },
+        winblend = 0,
+        border = true,
+        borderchars = { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
+        color_devicons = true,
+        set_env = { COLORTERM = 'truecolor' },
+
+        mappings = {
+          i = {
+            ['<C-j>'] = actions.move_selection_next,
+            ['<C-k>'] = actions.move_selection_previous,
+            ['<C-n>'] = actions.move_selection_next,
+            ['<C-p>'] = actions.move_selection_previous,
+            ['<C-c>'] = actions.close,
+            ['<CR>'] = actions.select_default,
+            ['<C-x>'] = actions.select_horizontal,
+            ['<C-v>'] = actions.select_vertical,
+            ['<C-t>'] = actions.select_tab,
+            ['<C-u>'] = actions.preview_scrolling_up,
+            ['<C-d>'] = actions.preview_scrolling_down,
+            ['<C-f>'] = actions.preview_scrolling_down,
+            ['<C-b>'] = actions.preview_scrolling_up,
+            ['<Tab>'] = actions.toggle_selection + actions.move_selection_worse,
+            ['<S-Tab>'] = actions.toggle_selection + actions.move_selection_better,
+            ['<C-q>'] = actions.smart_send_to_qflist + actions.open_qflist,
+            ['<C-l>'] = actions.complete_tag,
+            ['<C-s>'] = flash_jump,
+            ['<C-/>'] = actions.which_key,
+          },
+          n = {
+            ['<esc>'] = actions.close,
+            ['q'] = actions.close,
+            ['<CR>'] = actions.select_default,
+            ['<C-x>'] = actions.select_horizontal,
+            ['<C-v>'] = actions.select_vertical,
+            ['<C-t>'] = actions.select_tab,
+            ['j'] = actions.move_selection_next,
+            ['k'] = actions.move_selection_previous,
+            ['gg'] = actions.move_to_top,
+            ['G'] = actions.move_to_bottom,
+            ['<C-u>'] = actions.preview_scrolling_up,
+            ['<C-d>'] = actions.preview_scrolling_down,
+            ['<Tab>'] = actions.toggle_selection + actions.move_selection_worse,
+            ['<S-Tab>'] = actions.toggle_selection + actions.move_selection_better,
+            ['<C-q>'] = actions.smart_send_to_qflist + actions.open_qflist,
+            ['s'] = flash_jump,
+            ['?'] = actions.which_key,
           },
         },
-      }
+      },
 
-      -- Enable Telescope extensions if they are installed
-      pcall(telescope.load_extension, 'fzf')
-      pcall(telescope.load_extension, 'ui-select')
-    end,
-  },
+      pickers = {
+        find_files = {
+          hidden = true,
+          find_command = { 'rg', '--files', '--hidden', '-g', '!.git' },
+        },
+        live_grep = {
+          additional_args = function()
+            return { '--hidden', '--glob', '!.git/' }
+          end,
+        },
+        buffers = {
+          show_all_buffers = true,
+          sort_lastused = true,
+          theme = 'dropdown',
+          previewer = false,
+          mappings = {
+            i = {
+              ['<C-d>'] = actions.delete_buffer,
+            },
+            n = {
+              ['d'] = actions.delete_buffer,
+            },
+          },
+        },
+        oldfiles = {
+          only_cwd = true,
+        },
+        colorscheme = {
+          enable_preview = true,
+        },
+      },
+
+      extensions = {
+        ['ui-select'] = {
+          require('telescope.themes').get_dropdown({
+            winblend = 10,
+          }),
+        },
+        fzf = {
+          fuzzy = true,
+          override_generic_sorter = true,
+          override_file_sorter = true,
+          case_mode = 'smart_case',
+        },
+        file_browser = {
+          theme = 'ivy',
+          hijack_netrw = false,
+          hidden = true,
+          respect_gitignore = false,
+        },
+      },
+    })
+
+    -- Load extensions
+    pcall(telescope.load_extension, 'fzf')
+    pcall(telescope.load_extension, 'ui-select')
+    pcall(telescope.load_extension, 'file_browser')
+    pcall(telescope.load_extension, 'notify')
+  end,
 }
+
 -- vim: ts=2 sts=2 sw=2 et
